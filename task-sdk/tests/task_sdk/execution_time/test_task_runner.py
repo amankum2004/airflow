@@ -4106,22 +4106,18 @@ class TestTriggerDagRunOperator:
                     map_index=-1,
                 ),
             ),
+            mock.call.send(
+                msg=SetXCom(
+                    key="_link_TriggerDagRunLink",
+                    value=mock.ANY,
+                    dag_id="test_handle_trigger_dag_run",
+                    task_id="test_task",
+                    run_id="test_run",
+                    map_index=-1,
+                ),
+            ),
         ]
         mock_supervisor_comms.assert_has_calls(expected_calls)
-        trigger_link_xcom_calls = [
-            call
-            for call in mock_supervisor_comms.send.call_args_list
-            if isinstance(call.kwargs.get("msg"), SetXCom)
-            and call.kwargs["msg"].key == "_link_TriggerDagRunLink"
-        ]
-        assert len(trigger_link_xcom_calls) == 1
-        trigger_link_xcom = trigger_link_xcom_calls[0].kwargs["msg"]
-        assert trigger_link_xcom.dag_id == "test_handle_trigger_dag_run"
-        assert trigger_link_xcom.task_id == "test_task"
-        assert trigger_link_xcom.run_id == "test_run"
-        assert trigger_link_xcom.map_index == -1
-        assert isinstance(trigger_link_xcom.value, str)
-        assert "dags/test_dag/runs/test_run_id" in trigger_link_xcom.value
 
     @pytest.mark.parametrize(
         ("skip_when_already_exists", "expected_state"),
@@ -4246,6 +4242,16 @@ class TestTriggerDagRunOperator:
                 ),
             ),
             mock.call.send(
+                msg=SetXCom(
+                    key="_link_TriggerDagRunLink",
+                    value=mock.ANY,
+                    dag_id="test_handle_trigger_dag_run_wait_for_completion",
+                    task_id="test_task",
+                    run_id="test_run",
+                    map_index=-1,
+                ),
+            ),
+            mock.call.send(
                 msg=GetDagRunState(
                     dag_id="test_dag",
                     run_id="test_run_id",
@@ -4259,20 +4265,6 @@ class TestTriggerDagRunOperator:
             ),
         ]
         mock_supervisor_comms.assert_has_calls(expected_calls)
-        trigger_link_xcom_calls = [
-            call
-            for call in mock_supervisor_comms.send.call_args_list
-            if isinstance(call.kwargs.get("msg"), SetXCom)
-            and call.kwargs["msg"].key == "_link_TriggerDagRunLink"
-        ]
-        assert len(trigger_link_xcom_calls) == 1
-        trigger_link_xcom = trigger_link_xcom_calls[0].kwargs["msg"]
-        assert trigger_link_xcom.dag_id == "test_handle_trigger_dag_run_wait_for_completion"
-        assert trigger_link_xcom.task_id == "test_task"
-        assert trigger_link_xcom.run_id == "test_run"
-        assert trigger_link_xcom.map_index == -1
-        assert isinstance(trigger_link_xcom.value, str)
-        assert "dags/test_dag/runs/test_run_id" in trigger_link_xcom.value
 
     @pytest.mark.parametrize(
         ("allowed_states", "failed_states", "intermediate_state"),
