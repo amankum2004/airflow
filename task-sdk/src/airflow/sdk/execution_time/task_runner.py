@@ -1386,7 +1386,7 @@ def _handle_trigger_dag_run(
     # Store the run id from the dag run (either created or found above) to
     # be used when creating the extra link on the webserver.
     ti.xcom_push(key="trigger_run_id", value=drte.dag_run_id)
-    
+
     # Push TriggerDagRunOperator's serialized extra link immediately so it is available
     # while the parent task is still running/deferred.
     _push_operator_extra_links_to_xcom(ti, log, link_class_names={"TriggerDagRunLink"})
@@ -1686,7 +1686,9 @@ def _push_operator_extra_links_to_xcom(
             continue
         try:
             link = operator_extra_link.get_link(operator=task, ti_key=ti)  # type: ignore[arg-type]
-            log.debug("Setting xcom for operator extra link", link=link, xcom_key=operator_extra_link.xcom_key)
+            log.debug(
+                "Setting xcom for operator extra link", link=link, xcom_key=operator_extra_link.xcom_key
+            )
             _xcom_push_to_db(ti, key=operator_extra_link.xcom_key, value=link)
         except Exception:
             log.exception(
